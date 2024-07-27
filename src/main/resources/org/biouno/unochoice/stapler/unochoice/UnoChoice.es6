@@ -843,20 +843,27 @@ var UnoChoice = UnoChoice || ($ => {
                         }
                     });
                 } else { //Assume prototype should work
-                    new Ajax.Request(url+methodName, {
-                        method: 'post',
-                        requestHeaders: {'Content-type':'application/x-stapler-method-invocation;charset=UTF-8','Crumb':crumb},
-                        postBody: stringify(a),
-                        asynchronous: false, // and here
-                        onSuccess: function(t) {
-                            if (callback!==null) {
-                                t.responseObject = function() {
-                                    return eval(`(${this.responseText})`);
-                                };
-                                callback(t);
-                            }
+                    const xmlhttp = new XMLHttpRequest()
+
+                    xmlhttp.onreqadystatechange = function () {
+                        if (callback!==null) {
+                            t.responseObject = function() {
+                                return eval(`(${this.responseText})`);
+                            };
+                            callback(t);
                         }
-                    });
+                    }
+
+                    xmlhttp.open(
+                        "POST",
+                        url+methodName,
+                        false
+                    )
+
+                    xmlhttp.setRequestHeader('Content-type', 'application/x-stapler-method-invocation;charset=UTF-8')
+                    xmlhttp.setRequestHeader('Crumb', crumb)
+
+                    xmlhttp.send(stringify(a))
                 }
             }
         };
